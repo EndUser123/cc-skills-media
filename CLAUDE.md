@@ -2,41 +2,35 @@
 
 Media skills for Claude Code — NotebookLM integration, YouTube processing, and course generation.
 
-## Skills (8)
+## Skills (10)
 
 | Skill | Purpose |
 |-------|---------|
-| codebase-to-course | Convert codebase to interactive course |
-| nlm | NotebookLM integration |
-| nlm-cleanup | NotebookLM cleanup |
-| nlm-skill | NotebookLM skill wrapper |
-| nlm-to-wiki | NotebookLM to wiki conversion |
-| notebooklm-expert | NotebookLM expert mode |
-| yt-nlm | YouTube to NotebookLM pipeline |
-| yt-selenium | YouTube Selenium automation |
+| codebase-to-course | Codebase-to-Course |
+| nlm | NotebookLM CLI Expert |
+| nlm-cleanup | NotebookLM Notebook Cleanup |
+| nlm-skill | NotebookLM CLI & MCP Expert |
+| nlm-to-wiki | NLM to Wiki Sync |
+| notebooklm | NotebookLM Automation |
+| notebooklm-expert | NotebookLM Expert |
+| yt-is | /yt-is — YouTube Channel Management |
+| yt-nlm | /yt-nlm — NotebookLM Transcript Extraction |
+| yt-selenium | /yt-selenium — YouTube Transcript Extraction via Selenium |
 
 ## Artifacts Convention
 
 All runtime artifacts write to:
 
-```
-P:/.claude/.artifacts/{terminal_id}/<skill-name>/
-```
 
-`terminal_id` from `CLAUDE_TERMINAL_ID` env var (falls back to `"default"`).
 
-Skills MUST NOT write state to their own directory or to the package root. The `.gitignore` covers `.evidence/`, `.state/`, `.benchmarks/`, `__pycache__/`, `.claude/`.
+ from  env var (falls back to ).
 
-## NotebookLM Auth
-
-Several skills require NotebookLM authentication cookies. See individual skill docs for auth setup details.
+Skills MUST NOT write state to their own directory or to the package root.
 
 ## Installation
 
-Skills surfaced via junctions in `.claude/skills/`:
+Skills surfaced via junctions in :
 
-```powershell
-New-Item -ItemType Junction -Path "P:/.claude/skills/<name>" -Target "P:/packages/cc-skills-media/skills/<name>"
-```
 
-Command frontends live in `.claude/commands/<name>.md`.
+
+Command frontends live in .
