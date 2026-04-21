@@ -1,7 +1,14 @@
 ---
 name: nlm-skill
 description: "Expert guide for the NotebookLM CLI (`nlm`) and MCP server - interfaces for Google NotebookLM. Use this skill when users want to interact with NotebookLM programmatically, including: creating/managing notebooks, adding sources (URLs, YouTube, text, Google Drive), generating content (podcasts, reports, quizzes, flashcards, mind maps, slides, infographics, videos, data tables), conducting research, chatting with sources, or automating NotebookLM workflows. Triggers on mentions of \"nlm\", \"notebooklm\", \"notebook lm\", \"podcast generation\", \"audio overview\", or any NotebookLM-related automation task."
-version: "0.5.24"
+version: "0.5.26"
+enforcement: advisory
+workflow_steps:
+  - authenticate
+  - create_or_select_notebook
+  - add_sources
+  - generate_content
+  - manage_artifacts
 ---
 
 # NotebookLM CLI & MCP Expert
@@ -130,11 +137,15 @@ nlm login                           # Launch browser, extract cookies (primary m
 nlm login --check                   # Validate current session
 nlm login --profile work            # Use named profile for multiple accounts
 nlm login --provider openclaw --cdp-url http://127.0.0.1:18800  # External CDP provider
+nlm login --wsl                     # Use WSL2 Chrome for authentication (WSL2 systems)
 nlm login switch <profile>          # Switch the default profile
 nlm login profile list              # List all profiles with email addresses
 nlm login profile delete <name>     # Delete a profile
 nlm login profile rename <old> <new> # Rename a profile
+nlm login --clear                   # Wipe cached Chrome profile before logging in
 ```
+
+**MCP auto-reload**: After `nlm login`, the MCP server automatically refreshes authentication — no manual server restart needed.
 
 **Multi-Profile Support**: Each profile gets its own isolated browser session (supports Chrome, Arc, Brave, Edge, Chromium, and more), so you can be logged into multiple Google accounts simultaneously.
 
@@ -143,6 +154,10 @@ nlm login profile rename <old> <new> # Rename a profile
 **Switching MCP Accounts**: The MCP server always uses the active default profile. If you need to switch which Google account the MCP server is communicating with, you MUST use the CLI: run `nlm login switch <name>`. Your next MCP tool call will instantly use the new account.
 
 **Note**: Both MCP and CLI share the same authentication backend, so authenticating with one works for both.
+
+**Enterprise / Google Workspace**: Set `NOTEBOOKLM_BASE_URL` environment variable to use a workspace-hosted instance.
+
+**Diagnostics**: `nlm doctor` detects WSL2 and reports Chrome availability. `nlm setup add/remove all` for interactive multi-tool configuration.
 
 ### 2. Notebook Management
 
@@ -250,7 +265,7 @@ Use `studio_create` with `artifact_type` and type-specific options. All require 
 | artifact_type | Key Options |
 |--------------|-------------|
 | `audio` | `audio_format`: deep_dive/brief/critique/debate, `audio_length`: short/default/long |
-| `video` | `video_format`: explainer/brief, `visual_style`: auto_select/classic/whiteboard/kawaii/anime/watercolor/retro_print/heritage/paper_craft |
+| `video` | `video_format`: explainer/brief/cinematic, `visual_style`: auto_select/classic/whiteboard/kawaii/anime/watercolor/retro_print/heritage/paper_craft |
 | `report` | `report_format`: Briefing Doc/Study Guide/Blog Post/Create Your Own, `custom_prompt` |
 | `quiz` | `question_count`, `difficulty`: easy/medium/hard |
 | `flashcards` | `difficulty`: easy/medium/hard |
@@ -399,7 +414,8 @@ Use `server_info` to get version and check for updates:
 
 ```python
 mcp__notebooklm-mcp__server_info()
-# Returns: version, latest_version, update_available, update_command
+# Returns: version, latest_version, update_available, update_command, auth_state
+# auth_state: "configured" | "stale" | "not_configured" | "error"
 ```
 
 #### CLI Commands
