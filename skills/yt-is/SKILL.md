@@ -40,10 +40,20 @@ Check all tracked YouTube channels for new videos and manage your channel list.
   - ⚠️ **Quota warning**: `history` uses YouTube Data API for channel metadata resolution. Each channel lookup consumes API quota. If quota is exhausted, use `history --dry-run` to preview without adding.
   - `history --dry-run` — Preview channels without adding them
   - `history --min-history-videos <n>` — Minimum videos watched from a channel to qualify (default: 2)
+- `watchlater` — **Extract channels from YouTube Watch Later** and add any new ones not already tracked. Uses the same channel-resolution, filtering, and live-state replay flow as `history`.
+  - `watchlater --dry-run` — Preview channels without adding them
+  - `watchlater --min-watchlater-videos <n>` — Minimum videos in Watch Later from a channel to qualify (default: 2)
 - `fetch` — **ESCALATION BATCH PROCESS**: Download transcripts for all pending videos using yt-dlp → Selenium fallback (RECOMMENDED)
   - `fetch --dry-run` — Preview what would be fetched
   - `fetch --source <url>` — Process only one channel
   - `fetch --workers <n>` — Use N parallel workers (default: 1)
+
+## Live State
+
+- Live tracked channels and blocklist: `P:/.data/yt-is/batch_status.sqlite`
+- Append-only playlist import log: `P:/.data/yt-is/playlists.sqlite`
+- Transcript cache: `P:/.data/yt-is/transcripts.sqlite`
+- Backups: `P:/.data/yt-is/backups/`
 
 ## /yt-is add — Channel Validation Workflow
 
@@ -125,19 +135,25 @@ python bin/csf-source fetch --workers 2
 ## Data Flow
 
 ```
-channel_metadata table (SQLite)
+channel_metadata table in `P:/.data/yt-is/batch_status.sqlite`
   │
   ├─► yt-is sync ──► RSS check ──► Gap detection ──► API resolution
   │                                                │
   │                                                ▼
-  │                                       batch_status table (pending)
+   │                                       batch_status table (pending)
   │
-  └─► python bin/csf-source fetch ──► ESCALATION CHAIN (yt-dlp → Selenium) ──► transcripts.sqlite
+  └─► python bin/csf-source fetch ──► ESCALATION CHAIN (yt-dlp → Selenium) ──► `P:/.data/yt-is/transcripts.sqlite`
 ```
 
 ## Storage
 
-All data is stored in `batch_status.sqlite`:
+Live runtime state lives under `P:/.data/yt-is`:
+- `P:/.data/yt-is/batch_status.sqlite` — tracked channels, pending/complete/failed state
+- `P:/.data/yt-is/transcripts.sqlite` — transcript cache
+- `P:/.data/yt-is/backups/` — timestamped transcript backups
+- Before any tracked-channel sync or blocklist change, snapshot `P:/.data/yt-is/batch_status.sqlite` with `python P:/packages/yt-is/bin/csf-backup-channel-state`; for staged channel-state work, set `YTIS_BATCH_STATUS_DB_PATH=P:/.data/yt-is/batch-status-staging.sqlite` and promote with `python P:/packages/yt-is/bin/csf-promote-channel-state`.
+
+The `batch_status.sqlite` database contains:
 - `channel_metadata` — tracked channels with playlist IDs and metadata
 - `analysis_status` — video tracking (pending/complete/failed)
 
@@ -148,7 +164,7 @@ All data is stored in `batch_status.sqlite`:
   - Prefer `python bin/csf-source ...` when launching from a shell inside the repo so you do not depend on PATH.
   - **Rename note**: If `csf-source` is renamed, update `required_first_command_patterns` (line 19) and all `csf-source` command references in this SKILL.md. Search for `csf-source` to find all occurrences.
 - `P:/packages/yt-is/csf/source_enumerator.py` — RSS + API enumeration
-- `P:/packages/yt-is/csf/batch_status.py` — SQLite storage
+- `P:/packages/yt-is/csf/batch_status.py` — SQLite storage and live state under `P:/.data/yt-is`
 
 ## Requirements
 

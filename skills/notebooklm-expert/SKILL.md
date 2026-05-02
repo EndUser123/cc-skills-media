@@ -1,6 +1,6 @@
 ---
 name: notebooklm-expert
-description: Expert guide to building high-quality NotebookLM notebooks with the 4-step framework: Source Selection, Configuration, ACG Workflow, and Studio Outputs
+description: "Expert guide to building high-quality NotebookLM notebooks with the 4-step framework: Source Selection, Configuration, ACG Workflow, and Studio Outputs"
 version: 1.0.0
 status: stable
 author: NotebookLM Expert
