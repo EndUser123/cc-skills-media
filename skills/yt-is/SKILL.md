@@ -50,10 +50,10 @@ Check all tracked YouTube channels for new videos and manage your channel list.
 
 ## Live State
 
-- Live tracked channels and blocklist: `P:/.data/yt-is/batch_status.sqlite`
-- Append-only playlist import log: `P:/.data/yt-is/playlists.sqlite`
-- Transcript cache: `P:/.data/yt-is/transcripts.sqlite`
-- Backups: `P:/.data/yt-is/backups/`
+- Live tracked channels and blocklist: `P://.data/yt-is/batch_status.sqlite`
+- Append-only playlist import log: `P://.data/yt-is/playlists.sqlite`
+- Transcript cache: `P://.data/yt-is/transcripts.sqlite`
+- Backups: `P://.data/yt-is/backups/`
 
 ## /yt-is add — Channel Validation Workflow
 
@@ -135,23 +135,23 @@ python bin/csf-source fetch --workers 2
 ## Data Flow
 
 ```
-channel_metadata table in `P:/.data/yt-is/batch_status.sqlite`
+channel_metadata table in `P://.data/yt-is/batch_status.sqlite`
   │
   ├─► yt-is sync ──► RSS check ──► Gap detection ──► API resolution
   │                                                │
   │                                                ▼
    │                                       batch_status table (pending)
   │
-  └─► python bin/csf-source fetch ──► ESCALATION CHAIN (yt-dlp → Selenium) ──► `P:/.data/yt-is/transcripts.sqlite`
+  └─► python bin/csf-source fetch ──► ESCALATION CHAIN (yt-dlp → Selenium) ──► `P://.data/yt-is/transcripts.sqlite`
 ```
 
 ## Storage
 
-Live runtime state lives under `P:/.data/yt-is`:
-- `P:/.data/yt-is/batch_status.sqlite` — tracked channels, pending/complete/failed state
-- `P:/.data/yt-is/transcripts.sqlite` — transcript cache
-- `P:/.data/yt-is/backups/` — timestamped transcript backups
-- Before any tracked-channel sync or blocklist change, snapshot `P:/.data/yt-is/batch_status.sqlite` with `python P:/packages/yt-is/bin/csf-backup-channel-state`; for staged channel-state work, set `YTIS_BATCH_STATUS_DB_PATH=P:/.data/yt-is/batch-status-staging.sqlite` and promote with `python P:/packages/yt-is/bin/csf-promote-channel-state`.
+Live runtime state lives under `P://.data/yt-is`:
+- `P://.data/yt-is/batch_status.sqlite` — tracked channels, pending/complete/failed state
+- `P://.data/yt-is/transcripts.sqlite` — transcript cache
+- `P://.data/yt-is/backups/` — timestamped transcript backups
+- Before any tracked-channel sync or blocklist change, snapshot `P://.data/yt-is/batch_status.sqlite` with `python P://packages/yt-is/bin/csf-backup-channel-state`; for staged channel-state work, set `YTIS_BATCH_STATUS_DB_PATH=P://.data/yt-is/batch-status-staging.sqlite` and promote with `python P://packages/yt-is/bin/csf-promote-channel-state`.
 
 The `batch_status.sqlite` database contains:
 - `channel_metadata` — tracked channels with playlist IDs and metadata
@@ -159,12 +159,12 @@ The `batch_status.sqlite` database contains:
 
 ## Files
 
-- `P:/packages/yt-is/bin/yt-is` — CLI entry point (wrapper)
-- `P:/packages/yt-is/bin/csf-source` — Backend implementation (YouTube source management CLI)
+- `P://packages/yt-is/bin/yt-is` — CLI entry point (wrapper)
+- `P://packages/yt-is/bin/csf-source` — Backend implementation (YouTube source management CLI)
   - Prefer `python bin/csf-source ...` when launching from a shell inside the repo so you do not depend on PATH.
   - **Rename note**: If `csf-source` is renamed, update `required_first_command_patterns` (line 19) and all `csf-source` command references in this SKILL.md. Search for `csf-source` to find all occurrences.
-- `P:/packages/yt-is/csf/source_enumerator.py` — RSS + API enumeration
-- `P:/packages/yt-is/csf/batch_status.py` — SQLite storage and live state under `P:/.data/yt-is`
+- `P://packages/yt-is/csf/source_enumerator.py` — RSS + API enumeration
+- `P://packages/yt-is/csf/batch_status.py` — SQLite storage and live state under `P://.data/yt-is`
 
 ## Requirements
 

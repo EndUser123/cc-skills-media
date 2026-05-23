@@ -18,8 +18,8 @@ Commands requiring user confirmation before AI execution:
 ```
 User: "Delete that notebook"
 
-AI: "I found notebook 'AI Research' (ID: abc123...).
-⚠️ This will PERMANENTLY delete the notebook and all its sources, generated content, and history.
+AI: "I found notebook 'AI Research' (ID: abc123...). 
+⚠️ This will PERMANENTLY delete the notebook and all its sources, generated content, and history. 
 This action cannot be undone.
 
 Do you want me to proceed with deletion?"
