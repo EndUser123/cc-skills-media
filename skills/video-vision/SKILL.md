@@ -97,3 +97,21 @@ python P:/packages/.claude-marketplace/plugins/cc-skills-media/skills/video-visi
 ## Artifacts
 
 Write extraction output to `.claude/.artifacts/{terminal_id}/video-vision/<slug>/` — never into the skill directory or package root (per `cc-skills-media/CLAUDE.md`).
+
+## Verification (cold-start)
+
+```bash
+# 1) Test suite for the wrapper (4 tests: --check exit, resolver, SKILL frontmatter):
+python -m pytest plugins/cc-skills-media/skills/video-vision/tests/ -q
+# expect: 4 passed
+
+# 2) Resolve ffmpeg + crv (exit 0 == READY):
+python plugins/cc-skills-media/skills/video-vision/scripts/crv_run.py --check
+
+# 3) Real extraction through the wrapper (smoke):
+python plugins/cc-skills-media/skills/video-vision/scripts/crv_run.py "https://www.youtube.com/watch?v=wAIW31__ghE" \
+    -o .claude/.artifacts/<terminal_id>/video-vision/smoke --no-transcribe --max-frames 12
+# expect: a frames/ dir, MANIFEST.txt, and source.mp4 in the output.
+```
+
+The skill assumes ffmpeg is resolvable; on Windows it lives in a WinGet package dir (Gyan.FFmpeg). The wrapper resolves it via PATH → WinGet → imageio-ffmpeg alias so the skill is portable. If `--check` reports `NOT READY`, install ffmpeg (`winget install Gyan.FFmpeg`) or `pip install imageio-ffmpeg`.
