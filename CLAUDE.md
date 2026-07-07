@@ -2,7 +2,7 @@
 
 Media skills for Claude Code — NotebookLM integration, YouTube processing, course generation, and MiniMax AI content generation.
 
-## Skills (13)
+## Skills (14)
 
 | Skill | Purpose | Home |
 |-------|---------|------|
@@ -19,6 +19,7 @@ Media skills for Claude Code — NotebookLM integration, YouTube processing, cou
 | minimax-music-gen | MiniMax Music Generation | `minimax-music-gen/` |
 | minimax-music-playlist | MiniMax Music Playlist | `minimax-music-playlist/` |
 | minimax-multimodal-toolkit | MiniMax CLI (mmx) — text, image, video, speech, music, search | `minimax-multimodal-toolkit/` |
+| /video-vision | Video frame extraction (`crv`) so a vision LLM can watch a video, not just read its transcript | `video-vision/` |
 
 ## Artifacts Convention
 
