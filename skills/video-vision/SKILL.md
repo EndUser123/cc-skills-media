@@ -21,8 +21,8 @@ suggest:
   - yt-nlm
 
 workflow_steps:
-  - Verify deps with `python scripts/crv_smoketest.py` (crv + ffmpeg present)
-  - Run `crv <source> -o <out> [--max-frames N] [--scene 0.3] [--adaptive] [--no-transcribe]`
+  - Verify deps with `python scripts/crv_run.py --check` (resolves crv + ffmpeg)
+  - Run `python scripts/crv_run.py <source> -o <out> [--max-frames N] [--scene 0.3] [--adaptive] [--no-transcribe]` (puts ffmpeg on PATH, then calls `crv`)
   - Read the emitted `<out>/MANIFEST.txt` (frame index + timestamps) and `<out>/transcript.txt` if present
   - Feed selected `<out>/frames/*.jpg` to vision-analysis (MiniMax understand_image) or Claude native vision, one question per frame batch
   - Synthesize what the video SHOWS (visual) with what it SAYS (transcript)
@@ -30,9 +30,8 @@ workflow_steps:
 allowed_first_tools:
   - Bash
 required_first_command_patterns:
-  - '^crv\s+\S'
-  - '^python\s+.*crv_smoketest'
-required_first_command_hint: Run `crv <source>` (or the smoketest) first — frames must be extracted before any visual analysis. Reading a video file directly will not work; Claude cannot see pixels without extracted frames.
+  - '^python\s+.*crv_run'
+required_first_command_hint: Run `python scripts/crv_run.py <source>` first — it resolves ffmpeg onto PATH (Windows PATH divergence breaks bare `crv`) and extracts frames before any visual analysis. Claude cannot see video pixels without extracted frames.
 
 parameters:
   - name: source
@@ -65,19 +64,19 @@ Our `yt-*` skills extract **transcripts only**. `vision-analysis` reads a **sing
 ## Dependencies
 
 - `crv` CLI — `pip install claude-real-video` (MIT). The `[whisper]` extra is OPTIONAL; skip it when a `.vtt`/`.srt` already exists (crv detects and uses it).
-- `ffmpeg` — NOT required on PATH. `crv` depends on `imageio-ffmpeg`, which bundles a binary (`imageio_ffmpeg.get_ffmpeg_exe()`). The smoketest resolves and verifies it.
+- `ffmpeg` — required. crv shells out to bare `ffmpeg` via `shutil.which`, so it must be resolvable on PATH. **Do NOT call `crv` directly** — on Windows, ffmpeg is usually NOT on PATH (WinGet's Gyan.FFmpeg lands in a versioned package dir with no Links shim; crv's `imageio-ffmpeg` dep bundles a versioned-name binary crv can't see). `scripts/crv_run.py` resolves ffmpeg through PATH → WinGet → imageio-ffmpeg alias, then runs `crv`.
 - `yt-dlp` — already present in this environment (crv uses it for URL sources).
 
 Verify everything with the self-check:
 ```bash
-python P:/packages/.claude-marketplace/plugins/cc-skills-media/skills/video-vision/scripts/crv_smoketest.py
+python P:/packages/.claude-marketplace/plugins/cc-skills-media/skills/video-vision/scripts/crv_run.py --check
 ```
 
 ## Workflow
 
 1. **Extract.** Point `crv` at a URL or local file. For a cheap first pass, cap frames:
    ```bash
-   crv "<url-or-path>" -o .claude/.artifacts/<terminal_id>/video-vision/<slug> --max-frames 30 --no-transcribe
+   python scripts/crv_run.py "<url-or-path>" -o .claude/.artifacts/<terminal_id>/video-vision/<slug> --max-frames 30 --no-transcribe
    ```
    Use `--adaptive` for slow morphs/pans, `--grid` for a contact sheet, `--keep-audio` to retain audio.
 
